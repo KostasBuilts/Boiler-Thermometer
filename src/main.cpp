@@ -21,7 +21,8 @@ SleepClass sleep(9);
 unsigned int msgCount = 0; 
 unsigned int water_temp = 3800; 
 unsigned int vbat = 3333; 
-unsigned int air_temp = 0;
+unsigned int mean_air_temp = 0;
+int count;
 
 /**
  * @brief Creates a JSON object
@@ -35,7 +36,7 @@ String json_data_prep()
   json += ",\"waterTemp\":";
   json += (unsigned int)water_temp;
   json += ",\"airTemp\":";
-  json += (unsigned int)air_temp;
+  json += (unsigned int)mean_air_temp;
   json += ",\"VBat\":";
   json += (unsigned int)vbat;
   json += ",\"RSSI\":\"xxx\"}";
@@ -59,18 +60,23 @@ void loop()
   float tempC = sensors.getTempCByIndex(0);
   if(tempC != DEVICE_DISCONNECTED_C) 
   {
-    air_temp = tempC * 100;
+    mean_air_temp + tempC;
   } 
   else
   {
-    air_temp = -255;
+    mean_air_temp + -255;
   }
   ++msgCount;
-  LoRa.beginPacket();
-  LoRa.print(json_data_prep()); //send packet formed by the JSON object generator
-  LoRa.endPacket();
+  ++count;
+  if(count == 8)
+  {
+    mean_air_temp = (mean_air_temp / 8) * 10;
+    LoRa.beginPacket();
+    LoRa.print(json_data_prep()); //send packet formed by the JSON object generator
+    LoRa.endPacket();
+    count = 0;
+  }
   sleep.system_sleep();
-  //delay(1000);
 }
 
 ISR(WDT_vect)
