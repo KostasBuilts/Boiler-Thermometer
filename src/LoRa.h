@@ -22,10 +22,10 @@ copies or substantial portions of the Software.
 #include <Arduino.h>
 
 // tiny85 SPI pins
-#define spiSCK PB2
-#define spiDO PB1
-#define spiDI PB0
-#define ssPIN PB4
+#define spiSCK PA4
+#define spiDO PA5
+#define spiDI PA6
+#define ssPIN PB2
 
 #define PA_OUTPUT_RFO_PIN 0
 #define PA_OUTPUT_PA_BOOST_PIN 1

@@ -528,7 +528,7 @@ void LoRaClass::setSignalBandwidth(long sbw)
   {
     bw = 8;
   } 
-  else if (sbw <= 500E3) 
+  else 
   {
     bw = 9;
   }
