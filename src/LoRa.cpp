@@ -123,20 +123,20 @@ int LoRaClass::begin(long frequency)
 
   return 1;
 }
-static uint8_t LoRaClass::sendSPItiny85(uint8_t spiData)
+static uint8_t LoRaClass::sendSPItiny84(uint8_t spiData)
 {
   USIDR = spiData;                     // Load data into SPI data register
   USISR = (1 << USIOIF);               // clear SPI counter overflow flag
   while (((1 << USIOIF) & USISR) == 0 ) // transfer until the overflow bit is set
   {
-    USICR = (1 << USIWM0) | (1 << USICS1) | (1 << USITC) | (1 << USICLK); // Put tiny85 into SPI mode | external clock source , count on positive edge | toggle clock generator bit
+    USICR = (1 << USIWM0) | (1 << USICS1) | (1 << USITC) | (1 << USICLK); // Put tiny84 into SPI mode | external clock source , count on positive edge | toggle clock generator bit
   }
   return USIDR;  // retrieve data from Slave at end of 1 byte transfere
 }
 void LoRaClass::beginTinySPI(){
-  DDRB |= (1 << spiSCK);        // set  SCK  as output - SPI Clock
-  DDRB |= (1 << spiDO);         // set DO as output    - SPI data out
-  DDRB &= ~(1 << spiDI);        // set  DI as input    - SPI Data in
+  DDRA |= (1 << spiSCK);        // set  SCK  as output - SPI Clock
+  DDRA |= (1 << spiDO);         // set DO as output    - SPI data out
+  DDRA &= ~(1 << spiDI);        // set  DI as input    - SPI Data in
   DDRB |= (1 << ssPIN);      // slave select as output
 }
 
@@ -725,8 +725,8 @@ uint8_t LoRaClass::singleTransfer(uint8_t address, uint8_t value)
   uint8_t response;
 	
 	PORTB &= ~(1<<ssPIN);   // Pull ss Low
-  sendSPItiny85(address);  // address to read/write to slave
-	response = sendSPItiny85(value);	 // retrieve byte fro slave
+  sendSPItiny84(address);  // address to read/write to slave
+	response = sendSPItiny84(value);	 // retrieve byte fro slave
 	PORTB |= (1<< ssPIN);   // pull ss high again
 	return response;
 }

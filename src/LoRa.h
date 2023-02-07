@@ -21,7 +21,7 @@ copies or substantial portions of the Software.
 
 #include <Arduino.h>
 
-// tiny85 SPI pins
+// tiny84 SPI pins
 #define spiSCK PA4
 #define spiDO PA5
 #define spiDI PA6
@@ -38,7 +38,7 @@ public:
   int begin(long frequency);
   static void beginTinySPI();
   void end();
-  static uint8_t sendSPItiny85(uint8_t spiData); // transferr with ATtiny85 SPI
+  static uint8_t sendSPItiny84(uint8_t spiData); // transferr with ATtiny85 SPI
   int beginPacket(int implicitHeader = false);
   int endPacket(bool async = false);
 

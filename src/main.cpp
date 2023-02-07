@@ -4,10 +4,10 @@
 #include <LoRa.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
-#include <sleep.h>
+//#include <sleep.h>
 
 // Data wire is plugged into port 2 on the Arduino
-#define ONE_WIRE_BUS 3
+#define ONE_WIRE_BUS 9
 
 // Setup a oneWire instance to communicate with any OneWire devices (not just Maxim/Dallas temperature ICs)
 OneWire oneWire(ONE_WIRE_BUS);
@@ -16,7 +16,7 @@ OneWire oneWire(ONE_WIRE_BUS);
 DallasTemperature sensors(&oneWire);
 
 //Initializing the sleep class and setting the watchdog brownout timer
-SleepClass sleep(5);
+//SleepClass sleep(5);
 
 unsigned int msgCount = 0; 
 unsigned int water_temp = 3800; 
@@ -58,28 +58,28 @@ void loop()
 {
   sensors.requestTemperatures();
   float tempC = sensors.getTempCByIndex(0);
-  if(tempC != DEVICE_DISCONNECTED_C) 
+  /*if(tempC != DEVICE_DISCONNECTED_C) 
   {
     mean_air_temp = mean_air_temp + (tempC * 10);
   } 
   else
   {
     mean_air_temp = mean_air_temp -255;
-  }
+  }*/
 
   ++msgCount;
   ++count;
 
   if(count == 8)
   {
-    mean_air_temp = mean_air_temp / 8;
+    mean_air_temp = tempC;
     LoRa.beginPacket();
     LoRa.print(json_data_prep()); //send packet formed by the JSON object generator
     LoRa.endPacket();
     mean_air_temp = 0;
     count = 0;
   }
-  sleep.system_sleep();
+  //sleep.system_sleep();
 }
 
 ISR(WDT_vect)
