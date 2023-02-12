@@ -1,4 +1,4 @@
-/*#include <sleep.h>
+#include <sleep.h>
 
 SleepClass::SleepClass(int WDTV)
 {
@@ -23,10 +23,10 @@ void SleepClass::_setup_watchdog(int WDT)
 
   MCUSR &= ~(1 << WDRF);
   // start timed sequence
-  WDTCR |= (1 << WDCE) | (1 << WDE);
+  WDTCSR |= (1 << WDCE) | (1 << WDE);
   // set new watchdog timeout value
-  WDTCR = bb;
-  WDTCR |= _BV(WDIE);
+  WDTCSR = bb;
+  WDTCSR |= _BV(WDIE);
 }
 
 
@@ -45,4 +45,3 @@ void SleepClass::system_sleep()
   sleep_disable();                     // System continues execution here when watchdog timed out
   ADCSRA |= (1<<ADEN);                   // switch Analog to Digitalconverter ON
 }
-*/

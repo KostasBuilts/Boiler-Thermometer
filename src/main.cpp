@@ -1,13 +1,15 @@
-#include <avr/sleep.h>
-#include <avr/wdt.h>
+#include <Arduino.h>
+#include <ATTinyCore.h>
 #include <avr/interrupt.h>
 #include <LoRa.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
-//#include <sleep.h>
+#include <sleep.h>
+
+#define CPU_PRESCALER 0x80
 
 // Data wire is plugged into port 2 on the Arduino
-#define ONE_WIRE_BUS 9
+#define ONE_WIRE_BUS 1
 
 // Setup a oneWire instance to communicate with any OneWire devices (not just Maxim/Dallas temperature ICs)
 OneWire oneWire(ONE_WIRE_BUS);
@@ -16,7 +18,7 @@ OneWire oneWire(ONE_WIRE_BUS);
 DallasTemperature sensors(&oneWire);
 
 //Initializing the sleep class and setting the watchdog brownout timer
-//SleepClass sleep(5);
+SleepClass sleep(5);
 
 unsigned int msgCount = 0; 
 unsigned int water_temp = 3800; 
@@ -46,7 +48,9 @@ String json_data_prep()
 
 void setup() 
 {
+  CLKPR = CPU_PRESCALER;
   sensors.begin();
+  pinMode(9, OUTPUT);
   // Start loRa
   if (!LoRa.begin(412E6)) 
   {
@@ -58,28 +62,28 @@ void loop()
 {
   sensors.requestTemperatures();
   float tempC = sensors.getTempCByIndex(0);
-  /*if(tempC != DEVICE_DISCONNECTED_C) 
+  if(tempC != DEVICE_DISCONNECTED_C) 
   {
-    mean_air_temp = mean_air_temp + (tempC * 10);
+    mean_air_temp = mean_air_temp + (tempC * 100);
   } 
   else
   {
     mean_air_temp = mean_air_temp -255;
-  }*/
+  }
 
   ++msgCount;
   ++count;
 
   if(count == 8)
   {
-    mean_air_temp = tempC;
+    mean_air_temp = mean_air_temp / 8;
     LoRa.beginPacket();
     LoRa.print(json_data_prep()); //send packet formed by the JSON object generator
     LoRa.endPacket();
     mean_air_temp = 0;
     count = 0;
   }
-  //sleep.system_sleep();
+  sleep.system_sleep();
 }
 
 ISR(WDT_vect)
