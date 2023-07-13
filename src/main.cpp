@@ -10,16 +10,16 @@
 #define ONE_WIRE_BUS PB1
 
 // Data wire is plugged into port 3 on the Arduino
-#define ONE_WIRE_BUS2 
+#define ONE_WIRE_BUS2 PB0
 
 // Setup a oneWire instance to communicate with any OneWire devices (not just Maxim/Dallas temperature ICs)
-//OneWire oneWire(ONE_WIRE_BUS);
+OneWire oneWire(ONE_WIRE_BUS2);
 
 // Setup a oneWire instance to communicate with any OneWire devices (not just Maxim/Dallas temperature ICs)
 OneWire ONeWire(ONE_WIRE_BUS);
 
 // Pass our oneWire reference to Dallas Temperature.
-//DallasTemperature sensors(&oneWire);
+DallasTemperature sensors(&oneWire);
 
 // Pass our oneWire reference to Dallas Temperature.
 DallasTemperature Sensors(&ONeWire);
@@ -44,7 +44,7 @@ String json_data_prep()
   String json = "{\"Sensor\":\"Boiler\",\"ID\":12345678,\"msg\":";
   json += (unsigned int)msgCount;
   json += ",\"waterTemp\":";
-  json += (unsigned int)mean_water_temp * 100;
+  json += (unsigned int)mean_water_temp;
   json += ",\"airTemp\":";
   json += (unsigned int)mean_air_temp;
   json += ",\"VBat\":";
@@ -56,7 +56,7 @@ String json_data_prep()
 
 void setup() 
 {
-  //sensors.begin();
+  sensors.begin();
   Sensors.begin();
   // Start loRa
   if (!LoRa.begin(412E6)) 
@@ -78,8 +78,8 @@ void loop()
     mean_air_temp = mean_air_temp -255;
   }
 
-  /*sensors.requestTemperatures();
-  float tempC2 = sensors.getTempCByIndex(0);
+  sensors.requestTemperatures();
+  float tempC2 = sensors.getTempCByIndex(0)*100.0;
   if(tempC2 != DEVICE_DISCONNECTED_C) 
   {
     mean_water_temp = mean_water_temp + tempC2;
@@ -87,7 +87,7 @@ void loop()
   else
   {
     mean_water_temp = mean_water_temp -255;
-  }*/
+  }
 
   ++msgCount;
   ++count;
@@ -96,7 +96,7 @@ void loop()
   {
     mean_air_temp = mean_air_temp / 8;
     mean_water_temp = mean_water_temp / 8;
-    bat = (analogRead(PA0)*(0.00322580645161))*2000.0;
+    bat = (analogRead(PA3)*(0.00322580645161))*2000.0;
     vbat = bat;
     LoRa.beginPacket();
     LoRa.print(json_data_prep()); //send packet formed by the JSON object generator
