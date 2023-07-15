@@ -7,22 +7,26 @@
 #include <sleep.h>
 
 // Data wire is plugged into port 1 on the Arduino
-#define ONE_WIRE_BUS PB1
+#define ONE_WIRE_BUS PB0
+#define TEMPERATURE_PRECISION 12
 
 // Data wire is plugged into port 3 on the Arduino
-#define ONE_WIRE_BUS2 PB0
+//#define ONE_WIRE_BUS2 PB0
 
 // Setup a oneWire instance to communicate with any OneWire devices (not just Maxim/Dallas temperature ICs)
-OneWire oneWire(ONE_WIRE_BUS2);
+//OneWire ONeWire(ONE_WIRE_BUS2);
 
 // Setup a oneWire instance to communicate with any OneWire devices (not just Maxim/Dallas temperature ICs)
-OneWire ONeWire(ONE_WIRE_BUS);
+OneWire oneWire(ONE_WIRE_BUS);
 
 // Pass our oneWire reference to Dallas Temperature.
 DallasTemperature sensors(&oneWire);
 
 // Pass our oneWire reference to Dallas Temperature.
-DallasTemperature Sensors(&ONeWire);
+//DallasTemperature Sensors(&ONeWire);
+
+DeviceAddress airThermometer = { 0x28,0xA2,0x69,0x97,0x94,0x04,0x03,0xC6 };
+DeviceAddress waterThermometer   = { 0x28,0xE0,0x22,0x94,0x97,0x07,0x03,0x7D };
 
 //Initializing the sleep class and setting the watchdog brownout timer
 SleepClass sleep(5);
@@ -57,7 +61,9 @@ String json_data_prep()
 void setup() 
 {
   sensors.begin();
-  Sensors.begin();
+  sensors.setResolution(airThermometer, TEMPERATURE_PRECISION);
+  sensors.setResolution(waterThermometer, TEMPERATURE_PRECISION);
+  //Sensors.begin();
   // Start loRa
   if (!LoRa.begin(412E6)) 
   {
@@ -67,8 +73,8 @@ void setup()
 
 void loop()
 {
-  Sensors.requestTemperatures();
-  float tempC = Sensors.getTempCByIndex(0)*100.0;
+  sensors.requestTemperatures();
+  float tempC = sensors.getTempC(airThermometer)*100.0;
   if(tempC != DEVICE_DISCONNECTED_C) 
   {
     mean_air_temp = mean_air_temp + tempC;
@@ -79,7 +85,7 @@ void loop()
   }
 
   sensors.requestTemperatures();
-  float tempC2 = sensors.getTempCByIndex(0)*100.0;
+  float tempC2 = sensors.getTempC(waterThermometer)*100.0;
   if(tempC2 != DEVICE_DISCONNECTED_C) 
   {
     mean_water_temp = mean_water_temp + tempC2;
@@ -102,6 +108,7 @@ void loop()
     LoRa.print(json_data_prep()); //send packet formed by the JSON object generator
     LoRa.endPacket();
     mean_air_temp = 0;
+    mean_water_temp = 0;
     count = 0;
   }
   sleep.system_sleep();
